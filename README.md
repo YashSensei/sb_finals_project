@@ -2,6 +2,34 @@
 
 A production-grade URL shortening service built with Spring Boot and MongoDB. Features include JWT authentication, analytics tracking, QR code generation, rate limiting, and email notifications.
 
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **Java 17+** - [Download](https://adoptium.net/)
+- **Maven 3.8+** - [Download](https://maven.apache.org/download.cgi)
+
+### Run the Application
+```bash
+# Clone the repository
+git clone https://github.com/YashSensei/sb_finals_project.git
+cd sb_finals_project
+
+# Run the application
+mvn spring-boot:run
+```
+
+### Access the Application
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **API Docs**: http://localhost:8080/api-docs
+
+### Default Admin Login
+- **Email**: `admin@urlshortener.com`
+- **Password**: `admin123`
+
+---
+
 ## Features
 
 ### Core Features
