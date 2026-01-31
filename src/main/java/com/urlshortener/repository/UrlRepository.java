@@ -34,8 +34,8 @@ public interface UrlRepository extends MongoRepository<Url, String> {
 
     long countByUserIdAndIsActive(String userId, boolean isActive);
 
-    @Query("{'userId': ?0, 'expiresAt': {$lt: ?1, $ne: null}}")
-    long countByUserIdAndExpired(String userId, LocalDateTime now);
+    @Query(value = "{'userId': ?0, 'expiresAt': {$lt: ?1, $ne: null}}", count = true)
+    Long countByUserIdAndExpired(String userId, LocalDateTime now);
 
     List<Url> findTop5ByUserIdOrderByClickCountDesc(String userId);
 

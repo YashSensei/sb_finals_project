@@ -82,66 +82,84 @@ public class AnalyticsService {
         long totalClicks = clickEventRepository.countByUrlId(urlId);
 
         List<ClickEvent> uniqueIps = clickEventRepository.findDistinctIpAddressesByUrlId(urlId);
-        long uniqueVisitors = uniqueIps.stream()
+        long uniqueVisitors = uniqueIps != null ? uniqueIps.stream()
                 .map(ClickEvent::getIpAddress)
                 .distinct()
-                .count();
+                .count() : 0;
 
-        List<AnalyticsResponse.ClicksByDate> clicksByDate = clickEventRepository
-                .getClicksByDateRange(urlId, startDate, endDate)
-                .stream()
-                .map(dc -> AnalyticsResponse.ClicksByDate.builder()
-                        .date(dc.get_id())
-                        .clicks(dc.getCount())
-                        .build())
-                .collect(Collectors.toList());
-
-        List<AnalyticsResponse.CountryStats> topCountries = clickEventRepository
-                .getTopCountries(urlId)
-                .stream()
-                .map(fc -> AnalyticsResponse.CountryStats.builder()
-                        .country(fc.get_id() != null ? fc.get_id().toString() : "Unknown")
-                        .clicks(fc.getCount())
-                        .percentage(totalClicks > 0 ? (fc.getCount() * 100.0 / totalClicks) : 0)
-                        .build())
-                .collect(Collectors.toList());
-
-        List<AnalyticsResponse.BrowserStats> topBrowsers = clickEventRepository
-                .getTopBrowsers(urlId)
-                .stream()
-                .map(fc -> AnalyticsResponse.BrowserStats.builder()
-                        .browser(fc.get_id() != null ? fc.get_id().toString() : "Unknown")
-                        .clicks(fc.getCount())
-                        .percentage(totalClicks > 0 ? (fc.getCount() * 100.0 / totalClicks) : 0)
-                        .build())
-                .collect(Collectors.toList());
-
-        List<AnalyticsResponse.DeviceStats> deviceBreakdown = clickEventRepository
-                .getDeviceBreakdown(urlId)
-                .stream()
-                .map(fc -> AnalyticsResponse.DeviceStats.builder()
-                        .deviceType(fc.get_id() != null ? fc.get_id().toString() : "Unknown")
-                        .clicks(fc.getCount())
-                        .percentage(totalClicks > 0 ? (fc.getCount() * 100.0 / totalClicks) : 0)
-                        .build())
-                .collect(Collectors.toList());
-
-        List<AnalyticsResponse.ReferrerStats> topReferrers = clickEventRepository
-                .getTopReferrers(urlId)
-                .stream()
-                .map(fc -> AnalyticsResponse.ReferrerStats.builder()
-                        .referer(fc.get_id() != null ? fc.get_id().toString() : "Direct")
-                        .clicks(fc.getCount())
-                        .percentage(totalClicks > 0 ? (fc.getCount() * 100.0 / totalClicks) : 0)
-                        .build())
-                .collect(Collectors.toList());
-
+        List<AnalyticsResponse.ClicksByDate> clicksByDate = new java.util.ArrayList<>();
+        List<AnalyticsResponse.CountryStats> topCountries = new java.util.ArrayList<>();
+        List<AnalyticsResponse.BrowserStats> topBrowsers = new java.util.ArrayList<>();
+        List<AnalyticsResponse.DeviceStats> deviceBreakdown = new java.util.ArrayList<>();
+        List<AnalyticsResponse.ReferrerStats> topReferrers = new java.util.ArrayList<>();
         Map<String, Long> clicksByHour = new HashMap<>();
-        clickEventRepository.getClicksByHour(urlId).forEach(fc -> {
-            if (fc.get_id() != null) {
-                clicksByHour.put(fc.get_id().toString(), fc.getCount());
+
+        try {
+            var dateResults = clickEventRepository.getClicksByDateRange(urlId, startDate, endDate);
+            if (dateResults != null) {
+                clicksByDate = dateResults.stream()
+                        .map(dc -> AnalyticsResponse.ClicksByDate.builder()
+                                .date(dc.get_id())
+                                .clicks(dc.getCount())
+                                .build())
+                        .collect(Collectors.toList());
             }
-        });
+
+            var countryResults = clickEventRepository.getTopCountries(urlId);
+            if (countryResults != null) {
+                topCountries = countryResults.stream()
+                        .map(fc -> AnalyticsResponse.CountryStats.builder()
+                                .country(fc.get_id() != null ? fc.get_id().toString() : "Unknown")
+                                .clicks(fc.getCount())
+                                .percentage(totalClicks > 0 ? (fc.getCount() * 100.0 / totalClicks) : 0)
+                                .build())
+                        .collect(Collectors.toList());
+            }
+
+            var browserResults = clickEventRepository.getTopBrowsers(urlId);
+            if (browserResults != null) {
+                topBrowsers = browserResults.stream()
+                        .map(fc -> AnalyticsResponse.BrowserStats.builder()
+                                .browser(fc.get_id() != null ? fc.get_id().toString() : "Unknown")
+                                .clicks(fc.getCount())
+                                .percentage(totalClicks > 0 ? (fc.getCount() * 100.0 / totalClicks) : 0)
+                                .build())
+                        .collect(Collectors.toList());
+            }
+
+            var deviceResults = clickEventRepository.getDeviceBreakdown(urlId);
+            if (deviceResults != null) {
+                deviceBreakdown = deviceResults.stream()
+                        .map(fc -> AnalyticsResponse.DeviceStats.builder()
+                                .deviceType(fc.get_id() != null ? fc.get_id().toString() : "Unknown")
+                                .clicks(fc.getCount())
+                                .percentage(totalClicks > 0 ? (fc.getCount() * 100.0 / totalClicks) : 0)
+                                .build())
+                        .collect(Collectors.toList());
+            }
+
+            var referrerResults = clickEventRepository.getTopReferrers(urlId);
+            if (referrerResults != null) {
+                topReferrers = referrerResults.stream()
+                        .map(fc -> AnalyticsResponse.ReferrerStats.builder()
+                                .referer(fc.get_id() != null ? fc.get_id().toString() : "Direct")
+                                .clicks(fc.getCount())
+                                .percentage(totalClicks > 0 ? (fc.getCount() * 100.0 / totalClicks) : 0)
+                                .build())
+                        .collect(Collectors.toList());
+            }
+
+            var hourResults = clickEventRepository.getClicksByHour(urlId);
+            if (hourResults != null) {
+                hourResults.forEach(fc -> {
+                    if (fc.get_id() != null) {
+                        clicksByHour.put(fc.get_id().toString(), fc.getCount());
+                    }
+                });
+            }
+        } catch (Exception e) {
+            log.warn("Error fetching analytics aggregations: {}", e.getMessage());
+        }
 
         return AnalyticsResponse.builder()
                 .urlId(urlId)
@@ -163,7 +181,8 @@ public class AnalyticsService {
 
         long totalUrls = urlRepository.countByUserId(userId);
         long activeUrls = urlRepository.countByUserIdAndIsActive(userId, true);
-        long expiredUrls = urlRepository.countByUserIdAndExpired(userId, LocalDateTime.now());
+        Long expiredCount = urlRepository.countByUserIdAndExpired(userId, LocalDateTime.now());
+        long expiredUrls = expiredCount != null ? expiredCount : 0L;
         long totalClicks = clickEventRepository.countByUserId(userId);
 
         List<UrlResponse> recentUrls = urlRepository.findTop5ByUserIdOrderByCreatedAtDesc(userId)
@@ -176,24 +195,33 @@ public class AnalyticsService {
                 .map(url -> UrlResponse.fromUrl(url, baseUrl))
                 .collect(Collectors.toList());
 
-        LocalDateTime now = LocalDateTime.now();
-        List<AnalyticsResponse.ClicksByDate> clicksLast7Days = clickEventRepository
-                .getClicksByDateRangeForUser(userId, now.minusDays(7), now)
-                .stream()
-                .map(dc -> AnalyticsResponse.ClicksByDate.builder()
-                        .date(dc.get_id())
-                        .clicks(dc.getCount())
-                        .build())
-                .collect(Collectors.toList());
+        List<AnalyticsResponse.ClicksByDate> clicksLast7Days = new java.util.ArrayList<>();
+        List<AnalyticsResponse.ClicksByDate> clicksLast30Days = new java.util.ArrayList<>();
 
-        List<AnalyticsResponse.ClicksByDate> clicksLast30Days = clickEventRepository
-                .getClicksByDateRangeForUser(userId, now.minusDays(30), now)
-                .stream()
-                .map(dc -> AnalyticsResponse.ClicksByDate.builder()
-                        .date(dc.get_id())
-                        .clicks(dc.getCount())
-                        .build())
-                .collect(Collectors.toList());
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            var last7Days = clickEventRepository.getClicksByDateRangeForUser(userId, now.minusDays(7), now);
+            if (last7Days != null) {
+                clicksLast7Days = last7Days.stream()
+                        .map(dc -> AnalyticsResponse.ClicksByDate.builder()
+                                .date(dc.get_id())
+                                .clicks(dc.getCount())
+                                .build())
+                        .collect(Collectors.toList());
+            }
+
+            var last30Days = clickEventRepository.getClicksByDateRangeForUser(userId, now.minusDays(30), now);
+            if (last30Days != null) {
+                clicksLast30Days = last30Days.stream()
+                        .map(dc -> AnalyticsResponse.ClicksByDate.builder()
+                                .date(dc.get_id())
+                                .clicks(dc.getCount())
+                                .build())
+                        .collect(Collectors.toList());
+            }
+        } catch (Exception e) {
+            log.warn("Error fetching dashboard click data: {}", e.getMessage());
+        }
 
         return DashboardResponse.builder()
                 .totalUrls(totalUrls)

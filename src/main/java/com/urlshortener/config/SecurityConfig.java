@@ -59,7 +59,7 @@ public class SecurityConfig {
 
                         // URL redirect endpoint (public)
                         .requestMatchers(HttpMethod.GET, "/r/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/r/**/verify").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/r/*/verify").permitAll()
 
                         // QR code images (public)
                         .requestMatchers(HttpMethod.GET, "/api/v1/qr/**").permitAll()

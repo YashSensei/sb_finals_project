@@ -69,3 +69,4 @@ application-local.properties
 *.pem
 *.key
 secrets/
+sb_project_screenrecording.mp4
