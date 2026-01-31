@@ -70,3 +70,6 @@ application-local.properties
 *.key
 secrets/
 sb_project_screenrecording.mp4
+
+# Maven installation
+apache-maven-*/
