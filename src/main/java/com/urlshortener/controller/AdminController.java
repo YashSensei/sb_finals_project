@@ -4,6 +4,7 @@ import com.urlshortener.dto.response.ApiResponse;
 import com.urlshortener.dto.response.PageResponse;
 import com.urlshortener.dto.response.UrlResponse;
 import com.urlshortener.dto.response.UserResponse;
+import com.urlshortener.exception.ResourceNotFoundException;
 import com.urlshortener.model.Url;
 import com.urlshortener.model.User;
 import com.urlshortener.repository.ClickEventRepository;
@@ -93,7 +94,7 @@ public class AdminController {
     @Operation(summary = "Disable user", description = "Disables a user account")
     public ResponseEntity<ApiResponse<Void>> disableUser(@PathVariable String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         user.setEnabled(false);
         userRepository.save(user);
@@ -105,7 +106,7 @@ public class AdminController {
     @Operation(summary = "Enable user", description = "Enables a user account")
     public ResponseEntity<ApiResponse<Void>> enableUser(@PathVariable String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         user.setEnabled(true);
         userRepository.save(user);

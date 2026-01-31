@@ -3,6 +3,7 @@ package com.urlshortener.service;
 import com.urlshortener.dto.response.AnalyticsResponse;
 import com.urlshortener.dto.response.DashboardResponse;
 import com.urlshortener.dto.response.UrlResponse;
+import com.urlshortener.exception.ResourceNotFoundException;
 import com.urlshortener.model.ClickEvent;
 import com.urlshortener.model.Url;
 import com.urlshortener.model.User;
@@ -76,7 +77,7 @@ public class AnalyticsService {
 
     public AnalyticsResponse getUrlAnalytics(String urlId, LocalDateTime startDate, LocalDateTime endDate) {
         Url url = urlRepository.findById(urlId)
-                .orElseThrow(() -> new RuntimeException("URL not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("URL", "id", urlId));
 
         long totalClicks = clickEventRepository.countByUrlId(urlId);
 
@@ -136,8 +137,11 @@ public class AnalyticsService {
                 .collect(Collectors.toList());
 
         Map<String, Long> clicksByHour = new HashMap<>();
-        clickEventRepository.getClicksByHour(urlId).forEach(fc ->
-                clicksByHour.put(fc.get_id().toString(), fc.getCount()));
+        clickEventRepository.getClicksByHour(urlId).forEach(fc -> {
+            if (fc.get_id() != null) {
+                clicksByHour.put(fc.get_id().toString(), fc.getCount());
+            }
+        });
 
         return AnalyticsResponse.builder()
                 .urlId(urlId)

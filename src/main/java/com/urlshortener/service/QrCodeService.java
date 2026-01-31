@@ -7,6 +7,8 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.urlshortener.exception.BadRequestException;
+import com.urlshortener.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -65,7 +67,7 @@ public class QrCodeService {
 
         } catch (WriterException | IOException e) {
             log.error("Failed to generate QR code for {}: {}", shortCode, e.getMessage());
-            throw new RuntimeException("Failed to generate QR code", e);
+            throw new BadRequestException("Failed to generate QR code: " + e.getMessage());
         }
     }
 
@@ -75,7 +77,7 @@ public class QrCodeService {
             Path filePath = Paths.get(QR_CODE_DIR, fileName);
 
             if (!Files.exists(filePath)) {
-                throw new RuntimeException("QR code not found for: " + shortCode);
+                throw new ResourceNotFoundException("QR code", "shortCode", shortCode);
             }
 
             Resource resource = new UrlResource(filePath.toUri());
@@ -83,9 +85,9 @@ public class QrCodeService {
                 return resource;
             }
 
-            throw new RuntimeException("Could not read QR code file");
+            throw new BadRequestException("Could not read QR code file");
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Failed to load QR code", e);
+            throw new BadRequestException("Failed to load QR code: " + e.getMessage());
         }
     }
 
@@ -101,7 +103,7 @@ public class QrCodeService {
 
             return Files.readAllBytes(filePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read QR code", e);
+            throw new BadRequestException("Failed to read QR code: " + e.getMessage());
         }
     }
 
