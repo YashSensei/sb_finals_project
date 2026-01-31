@@ -1,0 +1,31 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/urlshortener_test
+      auto-index-creation: true
+
+  mail:
+    host: localhost
+    port: 1025
+
+jwt:
+  secret: test-secret-key-for-jwt-token-generation-must-be-256-bits-long
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+app:
+  base-url: http://localhost:8080
+  default-expiration-days: 30
+
+rate-limit:
+  requests-per-minute: 1000
+  requests-per-hour: 10000
+
+external:
+  geo-api:
+    url: http://ip-api.com/json/
+    enabled: false
+
+logging:
+  level:
+    com.urlshortener: DEBUG

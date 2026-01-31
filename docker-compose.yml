@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: url-shortener
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/urlshortener
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production-must-be-256-bits
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=your-email@gmail.com
+      - MAIL_PASSWORD=your-app-password
+      - APP_BASE_URL=http://localhost:8080
+    depends_on:
+      - mongo
+    networks:
+      - url-shortener-network
+    volumes:
+      - uploads-data:/app/uploads
+
+  mongo:
+    image: mongo:6.0
+    container_name: url-shortener-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - url-shortener-network
+
+networks:
+  url-shortener-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  uploads-data:
