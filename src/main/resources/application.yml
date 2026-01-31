@@ -4,7 +4,7 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/urlshortener}
+      uri: mongodb+srv://db_user:yash123@cluster0.lclgi72.mongodb.net/urlshortener?retryWrites=true&w=majority&appName=Cluster0
       auto-index-creation: true
 
   mail:
