@@ -66,7 +66,8 @@ The application uses **JWT (JSON Web Tokens)** for secure, stateless authenticat
   - **Refresh Token** (long-lived, 7 days) - Used to get new access tokens without re-login
 - Tokens are stored in the database and validated on each request
 - Passwords are hashed using **BCrypt** (industry-standard, one-way encryption)
-
+ 
+ 
 **Endpoints:**
 - `POST /api/v1/auth/register` - Create new account
 - `POST /api/v1/auth/login` - Login and get tokens
